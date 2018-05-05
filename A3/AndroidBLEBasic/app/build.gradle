@@ -20,6 +20,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.christophesmet:colorpicker:d84191b1cf'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:26.0.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'

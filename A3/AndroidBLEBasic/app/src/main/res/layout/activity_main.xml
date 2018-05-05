@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
     android:background="#FFF"
     android:orientation="vertical"
     tools:context="com.example.lianghe.android_ble_basic.MainActivity">
@@ -50,16 +52,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="9dp"
-                        android:text="Device:" />
+                        android:text="Device:"
+                        android:textSize="9dp" />
 
                     <TextView
                         android:id="@+id/deviceName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="9dp"
-                        android:text="" />
+                        android:text=""
+                        android:textSize="9dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -73,16 +75,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="9dp"
-                        android:text="RSSI:" />
+                        android:text="RSSI:"
+                        android:textSize="9dp" />
 
                     <TextView
                         android:id="@+id/rssiValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="9dp"
-                        android:text="" />
+                        android:text=""
+                        android:textSize="9dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -96,72 +98,66 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="9dp"
-                        android:text="UUID:" />
+                        android:text="UUID:"
+                        android:textSize="9dp" />
 
                     <TextView
                         android:id="@+id/uuidValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="9dp"
-                        android:text="" />
+                        android:text=""
+                        android:textSize="9dp" />
                 </LinearLayout>
 
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 
-    <TextView
+    <ToggleButton
+        android:id="@+id/control_button"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="10dp"
-        android:background="#dfdfdf" />
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:checked="false"
+        android:enabled="false"
+        android:textOff="Activate Bluetooth Control"
+        android:textOn="Activate Physical Control"
+        tools:padding="5px" />
 
-    <LinearLayout
+    <ToggleButton
+        android:id="@+id/power_button"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:padding="0dp">
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:checked="false"
+        android:enabled="false"
+        android:textOff="Turn Off"
+        android:textOn="Turn On"
+        tools:padding="5px" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+    <Spinner
+        android:id="@+id/color_mode_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/digitalOut"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:text="Digital Out (write)"
-                android:textColor="#000000" />
+    <com.christophesmet.android.views.colorpicker.ColorPickerView
+        android:id="@+id/color_picker_view"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:radiusOffset="24dp"
+        app:thumbDrawable="@drawable/img_wheel_handle"
+        app:wheelDrawable="@drawable/img_wheel" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_weight="1"
-                android:text="@string/digital_write"
-                android:textColor="@android:color/holo_blue_dark" />
-
-            <ToggleButton
-                android:id="@+id/DOutBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginRight="20dp"
-                android:checked="false"
-                android:enabled="false"
-                android:textOff="OFF"
-                android:textOn="ON" />
-
-        </LinearLayout>
-
-
-    </LinearLayout>
+    </com.christophesmet.android.views.colorpicker.ColorPickerView>
 
 
 </LinearLayout>

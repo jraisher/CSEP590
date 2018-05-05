@@ -293,7 +293,6 @@ public class MainActivity extends AppCompatActivity {
         if (event.sensor.getType() == Sensor.TYPE_GRAVITY
             && colorInputMode == GRAVITY_COLOR_SELECTION) {
           float total = event.values[0] + event.values[1] + event.values[2];
-          Log.i("JMRJMRJMR", "Setting color through the gravity sensor");
           setColor(
               event.values[0] / total,
               event.values[1] / total,

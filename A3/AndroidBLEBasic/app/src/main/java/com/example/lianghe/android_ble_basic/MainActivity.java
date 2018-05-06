@@ -23,6 +23,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
   private ColorPickerView colorPicker = null;
   private SensorManager sensorManager = null;
   private Sensor gravitySensor = null;
-  private SensorEventListener gravitySensorListener = null;
+  private SensorEventListener sensorListener = null;
+  private Handler handler;
+  private BatteryManager batteryManager;
 
   // Declare all Bluetooth stuff
   private BluetoothGattCharacteristic mCharacteristicTx = null;
@@ -283,16 +287,18 @@ public class MainActivity extends AppCompatActivity {
     powerButton = (ToggleButton) findViewById(R.id.power_button);
     colorModeSpinner = (Spinner) findViewById(R.id.color_mode_spinner);
     colorPicker = (ColorPickerView) findViewById(R.id.color_picker_view);
+    handler = new Handler();
+    batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
     mUUID = (TextView) findViewById(R.id.uuidValue);
 
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-    gravitySensorListener = new SensorEventListener(){
+    sensorListener = new SensorEventListener(){
       @Override
       public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_GRAVITY
             && colorInputMode == GRAVITY_COLOR_SELECTION) {
-          float total = event.values[0] + event.values[1] + event.values[2];
+          double total = event.values[0] + event.values[1] + event.values[2];
           setColor(
               event.values[0] / total,
               event.values[1] / total,
@@ -306,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
       }
     };
     sensorManager.registerListener(
-        gravitySensorListener, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorListener, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL);
 
     disableColorInput();
     disablePowerInput();
@@ -378,7 +384,8 @@ public class MainActivity extends AppCompatActivity {
 
     colorModeSpinner.setAdapter(new ArrayAdapter<CharSequence>(
         this, R.layout.support_simple_spinner_dropdown_item,
-        new String[]{MANUAL_COLOR_SELECTION, GRAVITY_COLOR_SELECTION}));
+        new String[]{
+            MANUAL_COLOR_SELECTION, GRAVITY_COLOR_SELECTION, EXPERIMENTAL_COLOR_SELECTION}));
     colorModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -485,6 +492,7 @@ public class MainActivity extends AppCompatActivity {
 
   private static final String MANUAL_COLOR_SELECTION = "Manual";
   private static final String GRAVITY_COLOR_SELECTION = "Gravity";
+  private static final String EXPERIMENTAL_COLOR_SELECTION = "Battery";
 
   private String colorInputMode = MANUAL_COLOR_SELECTION;
 
@@ -540,14 +548,31 @@ public class MainActivity extends AppCompatActivity {
     colorPicker.setVisibility(View.INVISIBLE);
 
     colorInputMode = input;
-    if (input == MANUAL_COLOR_SELECTION) {
+    if (colorInputMode == MANUAL_COLOR_SELECTION) {
       colorPicker.setVisibility(View.VISIBLE);
       double[] colors = intToColors(colorPicker.getColor());
       turnOnLight(colors[RED], colors[GREEN], colors[BLUE]);
-    } else if (input == GRAVITY_COLOR_SELECTION) {
+    } if (colorInputMode == EXPERIMENTAL_COLOR_SELECTION) {
+      Runnable weatherChecker = new Runnable() {
+        @Override
+        public void run() {
+          if (colorInputMode == EXPERIMENTAL_COLOR_SELECTION) {
+            double charge =
+                (double) batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                    / 100f;
 
+            double red = Math.min(1f, Math.max(0f, (2.0f - 3f * charge)));
+            double green = Math.min(1f, Math.max(0f, (1.5 - 3f * Math.abs(charge - 0.5))));
+            double blue = Math.min(1f, Math.max(0f, (3f * charge - 2)));
+
+            setColor(red, green, blue);
+            // Every 5 minutes;
+            handler.postDelayed(this, 300000);
+          }
+        }
+      };
+      handler.post(weatherChecker);
     }
-
   }
 
   /**

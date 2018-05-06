@@ -25,8 +25,6 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 #define GREEN D1
 #define BLUE D2
 
-#define TEST_OUT D3
-
 #define LIGHT_SENSOR A0
 #define PRESSURE_SENSOR A1
 
@@ -97,15 +95,6 @@ int bleWriteCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size) {
     byte red = receive_data[0] & 0x0f;
     byte green = receive_data[1] >> 4;
     byte blue = receive_data[1] & 0x0f;
-    Serial.print("Recieved message: Code: ");
-    Serial.print(code);
-    Serial.print(", red: ");
-    Serial.print(red);
-    Serial.print(", green: ");
-    Serial.print(green);
-    Serial.print(", blue: ");
-    Serial.print(blue);
-    Serial.print("\n");
     switch(code) {
       case 0x00:
         handleTurnOff();
@@ -197,8 +186,6 @@ void setup() {
   pinMode(GREEN, OUTPUT);
   pinMode(BLUE, OUTPUT);
 
-  pinMode(TEST_OUT, OUTPUT);
-
   pinMode(LIGHT_SENSOR, INPUT);
   pinMode(PRESSURE_SENSOR, INPUT);
 }
@@ -232,13 +219,6 @@ void senseColorState() {
 }
 
 void setColor(float red, float green, float blue) {
-  Serial.print("Setting color: red: ");
-  Serial.print(red);
-  Serial.print(" green: ");
-  Serial.print(green);
-  Serial.print(" blue: ");
-  Serial.print(blue);
-  Serial.print("\n");
   int rvalue = 255 * (1.0 - red);
   int gvalue = 255 * (1.0 - green);
   int bvalue = 255 * (1.0 - blue);

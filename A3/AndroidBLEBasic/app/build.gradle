@@ -4,9 +4,9 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.example.lianghe.pincontroldemo_android"
-        minSdkVersion 18
+        minSdkVersion 21
         // Set the target SDK version to 19 since we built our skeleton code based on RedBear provided code
-        targetSdkVersion 19
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

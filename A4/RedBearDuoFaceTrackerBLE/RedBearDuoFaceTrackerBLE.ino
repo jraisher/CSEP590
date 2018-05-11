@@ -20,11 +20,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 // Must be an integer between 1 and 9 and and must also be set to len(BLE_SHORT_NAME) + 1
 #define BLE_SHORT_NAME_LEN 8 
 
-// The number of chars should be BLE_SHORT_NAME_LEN - 1. So, for example, if your BLE_SHORT_NAME was 'J', 'o', 'n'
-// then BLE_SHORT_NAME_LEN should be 4. If 'M','a','k','e','L','a','b' then BLE_SHORT_NAME_LEN should be 8
-// TODO: you must change this name. Otherwise, you will not be able to differentiate your RedBear Duo BLE
-// device from everyone else's device in class.
-#define BLE_SHORT_NAME 'M','a','k','e','L','a','b'  
+#define BLE_SHORT_NAME 'J','M','R','_','A','4'  
 
 /* Define the pins on the Duo board
  * TODO: change and add/subtract the pins here for your applications (as necessary)

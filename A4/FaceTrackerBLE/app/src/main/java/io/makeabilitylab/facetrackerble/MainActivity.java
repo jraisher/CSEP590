@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements BLEListener{
     // TODO: Define your device name and the length of the name. For your assignment, do not use the
     // default name or you will not be able to discriminate your board from everyone else's board.
     // Note the device name and the length should be consistent with the ones defined in the Duo sketch
-    private final String TARGET_BLE_DEVICE_NAME = "MakeLab";
+    private final String TARGET_BLE_DEVICE_NAME = "JMR_A4";
 
     //==============================================================================================
     // Activity Methods

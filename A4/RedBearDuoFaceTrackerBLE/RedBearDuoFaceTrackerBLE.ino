@@ -161,6 +161,8 @@ void bleDisconnectedCallback(uint16_t handle) {
  *
  * @retval 
  */
+int happiness = 0;
+
 int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size) {
 
   if (receive_handle == value_handle) {
@@ -185,9 +187,10 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
         digitalWrite(RIGHT_EYE_ANALOG_OUT_PIN, LOW);
       }
 
-      float happiness = (float) receive_data[3] / 255.0;
-      _happinessServo.write(
-          (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) * happiness));
+      happiness  = happiness + 10;
+      //float happiness = (float) receive_data[3] / 255.0;
+      //_happinessServo.write(happiness);
+         // (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) * happiness));
     }
   }
   return 0;

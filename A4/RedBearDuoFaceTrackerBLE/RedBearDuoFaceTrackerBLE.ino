@@ -18,7 +18,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 #define SEND_MAX_LEN    3
 
 // Must be an integer between 1 and 9 and and must also be set to len(BLE_SHORT_NAME) + 1
-#define BLE_SHORT_NAME_LEN 8 
+#define BLE_SHORT_NAME_LEN 7 
 
 #define BLE_SHORT_NAME 'J','M','R','_','A','4'  
 
@@ -26,7 +26,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
  * TODO: change and add/subtract the pins here for your applications (as necessary)
  */
 #define LEFT_EYE_ANALOG_OUT_PIN D0
-#define RIGHT_EYE_ANALOG_OUT_PIN D1
+#define RIGHT_EYE_ANALOG_OUT_PIN D8
 #define HAPPINESS_ANALOG_OUT_PIN D2
 
 #define MAX_SERVO_ANGLE  180
@@ -174,10 +174,20 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
     
     // process the data. 
     if (receive_data[0] == 0x01) { //receive the face data 
-      // CSE590 Student TODO
-      // Write code here that processes the FaceTrackerBLE data from Android
-      // and properly angles the servo + ultrasonic sensor towards the face
-      // Example servo code here: https://github.com/jonfroehlich/CSE590Sp2018/tree/master/L06-Arduino/RedBearDuoServoSweep   
+      if (receive_data[1] == 0x01) {
+        digitalWrite(LEFT_EYE_ANALOG_OUT_PIN, HIGH);
+      } else {
+        digitalWrite(LEFT_EYE_ANALOG_OUT_PIN, LOW);
+      }
+      if (receive_data[2] == 0x01) {
+        digitalWrite(RIGHT_EYE_ANALOG_OUT_PIN, HIGH);
+      } else {
+        digitalWrite(RIGHT_EYE_ANALOG_OUT_PIN, LOW);
+      }
+
+      float happiness = (float) receive_data[3] / 255.0;
+      _happinessServo.write(
+          (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) * happiness));
     }
   }
   return 0;

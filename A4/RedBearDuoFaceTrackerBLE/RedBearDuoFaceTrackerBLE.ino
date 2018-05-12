@@ -25,12 +25,16 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 /* Define the pins on the Duo board
  * TODO: change and add/subtract the pins here for your applications (as necessary)
  */
-#define LEFT_EYE_ANALOG_OUT_PIN D0
-#define RIGHT_EYE_ANALOG_OUT_PIN D8
-#define HAPPINESS_ANALOG_OUT_PIN D2
+#define TRIGGER_PIN D0
+#define ECHO_PIN D1
+#define SERVO_ANALOG_PIN D2
+#define LIGHT_PIN D8
 
 #define MAX_SERVO_ANGLE  180
 #define MIN_SERVO_ANGLE  0
+
+#define MAX_DISTANCE 400  // cm
+#define ALERT_DISTANCE 50  // cm
 
 #define BLE_DEVICE_CONNECTED_DIGITAL_OUT_PIN D7
 
@@ -76,7 +80,6 @@ int _sendDataFrequency = 200; // 200ms (how often to read the pins and transmit 
 void setup() {
   Serial.begin(115200);
   delay(5000);
-  Serial.println("Face Tracker BLE Demo.");
 
   // Initialize ble_stack.
   ble.init();
@@ -104,10 +107,11 @@ void setup() {
   Serial.println("BLE start advertising.");
 
   // Setup pins
-  pinMode(LEFT_EYE_ANALOG_OUT_PIN, OUTPUT);
-  pinMode(RIGHT_EYE_ANALOG_OUT_PIN, OUTPUT);
+  pinMode(TRIGGER_PIN, OUTPUT);
+  digitalWrite(TRIGGER_PIN, LOW);
+  
   pinMode(BLE_DEVICE_CONNECTED_DIGITAL_OUT_PIN, OUTPUT);
-  _happinessServo.attach(HAPPINESS_ANALOG_OUT_PIN);
+  _happinessServo.attach(SERVO_ANALOG_PIN);
   _happinessServo.write( (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) / 2.0) );
 
   // Start a task to check status of the pins on your RedBear Duo
@@ -119,7 +123,28 @@ void setup() {
 
 void loop() 
 {
-  // Not currently used. The "meat" of the program is in the callback bleWriteCallback and send_notify
+  unsigned long t1;
+  unsigned long t2;
+  unsigned long pulse_width;
+  float cm;
+  float inches;
+
+  digitalWrite(TRIGGER_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGGER_PIN, LOW);
+
+  while( digitalRead(ECHO_PIN) == 0);
+
+  t1 = micros();
+  while ( digitalRead(ECHO_PIN) == 1);
+  t2 = micros();
+
+  pulse_width = t2 - t1;
+  cm = pulse_widt / 58.0;
+
+  if (cm > ALERT_DISTANCE) {
+    // Send the data
+  }
 }
 
 /**

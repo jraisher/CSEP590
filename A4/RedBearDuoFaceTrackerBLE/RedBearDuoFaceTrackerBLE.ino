@@ -14,7 +14,7 @@
 SYSTEM_MODE(SEMI_AUTOMATIC); 
 #endif
 
-#define RECEIVE_MAX_LEN  5 // TODO: change this based on how much data you are sending from Android 
+#define RECEIVE_MAX_LEN  2 
 #define SEND_MAX_LEN    3
 
 // Must be an integer between 1 and 9 and and must also be set to len(BLE_SHORT_NAME) + 1
@@ -33,14 +33,15 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 
 #define MAX_SERVO_ANGLE  180
 #define MIN_SERVO_ANGLE  0
+int SERVO_ANGLE = (MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) / 2;
 
 #define MAX_DISTANCE 400  // cm
-#define ALERT_DISTANCE 50  // cm
+#define ALERT_DISTANCE 30  // cm
 
 #define BLE_DEVICE_CONNECTED_DIGITAL_OUT_PIN D7
 
 // happiness meter (servo)
-Servo _happinessServo;
+Servo _servo;
 
 // Device connected and disconnected callbacks
 void deviceConnectedCallback(BLEStatus_t status, uint16_t handle);
@@ -116,8 +117,8 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
 
   pinMode(BLE_DEVICE_CONNECTED_DIGITAL_OUT_PIN, OUTPUT);
-  _happinessServo.attach(SERVO_ANALOG_PIN);
-  _happinessServo.write( (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) / 2.0) );
+  _servo.attach(SERVO_ANALOG_PIN);
+  _servo.write(SERVO_ANGLE);
 
   // Start a task to check status of the pins on your RedBear Duo
   // Works by polling every X milliseconds where X is _sendDataFrequency
@@ -128,6 +129,7 @@ void setup() {
   Serial.println("Finishing Setup");
 }
 
+bool WARN = false;
 void loop() 
 {
   unsigned long t1;
@@ -147,9 +149,15 @@ void loop()
   cm = (pulse_width / 2) * 0.0344;
   Serial.println(cm);
 
-  if (cm < ALERT_DISTANCE) {
-    signalAlert();
+  if (cm < ALERT_DISTANCE && cm > 1.0) {
+    if (WARN) {
+      signalAlert();      
+    } else {
+      WARN = true;
+      delay(250);
+    }
   } else {
+    WARN = false;
     digitalWrite(BUZZER_PIN, LOW);
     delay(500);
   }
@@ -225,9 +233,23 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
       Serial.print(" ");
     }
     Serial.println(" ");
-    
-    // process the data. 
-    if (receive_data[0] == 0x01) { //receive the face data 
+
+    int delta = 0;
+    switch (receive_data[0]) {
+      case 0x00:
+        delta = (receive_data[1] - 128) / 10;
+        if (delta > 0) {
+          SERVO_ANGLE = constrain(
+            SERVO_ANGLE - 1, MIN_SERVO_ANGLE, MAX_SERVO_ANGLE);;
+        } else if (delta < 0) {
+          SERVO_ANGLE = constrain(
+            SERVO_ANGLE + 1, MIN_SERVO_ANGLE, MAX_SERVO_ANGLE);;
+        }
+        _servo.write(SERVO_ANGLE);
+        break;
+      default:
+        Serial.println("Received an unknown control code.");
+        Serial.println(receive_data[0]);
     }
   }
   return 0;

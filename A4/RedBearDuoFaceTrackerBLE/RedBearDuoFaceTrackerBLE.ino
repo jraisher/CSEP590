@@ -29,6 +29,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 #define ECHO_PIN D1
 #define SERVO_ANALOG_PIN D2
 #define LIGHT_PIN D8
+#define BUZZER_PIN D9
 
 #define MAX_SERVO_ANGLE  180
 #define MIN_SERVO_ANGLE  0
@@ -78,7 +79,9 @@ static void bleSendDataTimerCallback(btstack_timer_source_t *ts); // function de
 int _sendDataFrequency = 200; // 200ms (how often to read the pins and transmit the data to Android)
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  Serial.println("Starting Setup");
+
   delay(5000);
 
   // Initialize ble_stack.
@@ -108,8 +111,10 @@ void setup() {
 
   // Setup pins
   pinMode(TRIGGER_PIN, OUTPUT);
-  digitalWrite(TRIGGER_PIN, LOW);
-  
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(LIGHT_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
   pinMode(BLE_DEVICE_CONNECTED_DIGITAL_OUT_PIN, OUTPUT);
   _happinessServo.attach(SERVO_ANALOG_PIN);
   _happinessServo.write( (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) / 2.0) );
@@ -119,6 +124,8 @@ void setup() {
   send_characteristic.process = &bleSendDataTimerCallback;
   ble.setTimer(&send_characteristic, _sendDataFrequency); 
   ble.addTimer(&send_characteristic);
+
+  Serial.println("Finishing Setup");
 }
 
 void loop() 
@@ -129,22 +136,42 @@ void loop()
   float cm;
   float inches;
 
+  digitalWrite(TRIGGER_PIN, LOW);
+  delay(2);
+  
   digitalWrite(TRIGGER_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIGGER_PIN, LOW);
 
-  while( digitalRead(ECHO_PIN) == 0);
+  pulse_width = pulseIn(ECHO_PIN, HIGH);
+  cm = (pulse_width / 2) * 0.0344;
+  Serial.println(cm);
 
-  t1 = micros();
-  while ( digitalRead(ECHO_PIN) == 1);
-  t2 = micros();
-
-  pulse_width = t2 - t1;
-  cm = pulse_widt / 58.0;
-
-  if (cm > ALERT_DISTANCE) {
-    // Send the data
+  if (cm < ALERT_DISTANCE) {
+    signalAlert();
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);
+    delay(500);
   }
+}
+
+/**
+ * Signal the alert.
+ */
+int LIGHT_STATE = HIGH;
+void signalAlert() {
+  Serial.println("alert");
+  if (LIGHT_STATE == HIGH) {
+    LIGHT_STATE = LOW;
+  } else {
+    LIGHT_STATE = HIGH;
+  }
+  digitalWrite(LIGHT_PIN, LIGHT_STATE);
+  tone(BUZZER_PIN, 440, 225);
+  delay(225);
+  tone(BUZZER_PIN, 880, 225);
+  delay(225);
+  digitalWrite(LIGHT_PIN, LOW);
 }
 
 /**
@@ -201,21 +228,6 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
     
     // process the data. 
     if (receive_data[0] == 0x01) { //receive the face data 
-      if (receive_data[1] == 0x01) {
-        digitalWrite(LEFT_EYE_ANALOG_OUT_PIN, HIGH);
-      } else {
-        digitalWrite(LEFT_EYE_ANALOG_OUT_PIN, LOW);
-      }
-      if (receive_data[2] == 0x01) {
-        digitalWrite(RIGHT_EYE_ANALOG_OUT_PIN, HIGH);
-      } else {
-        digitalWrite(RIGHT_EYE_ANALOG_OUT_PIN, LOW);
-      }
-
-      happiness  = happiness + 10;
-      //float happiness = (float) receive_data[3] / 255.0;
-      //_happinessServo.write(happiness);
-         // (int)((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) * happiness));
     }
   }
   return 0;

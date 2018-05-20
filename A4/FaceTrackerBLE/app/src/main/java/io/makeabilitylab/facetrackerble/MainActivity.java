@@ -428,21 +428,10 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
       //
       // You can also turn on Landmark detection to get more information about the face like cheek, ear, mouth, etc.
       //   See: https://developers.google.com/android/reference/com/google/android/gms/vision/face/Landmark
-      boolean isPortrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-      String debugFaceInfo = String.format("Portrait: %b Front-Facing Camera: %b FaceId: %d Loc (x,y): (%.1f, %.1f) Size (w, h): (%.1f, %.1f) Left Eye: %.1f Right Eye: %.1f  Smile: %.1f",
-          isPortrait,
-          face.getId(),
-          face.getPosition().x, face.getPosition().y,
-          face.getHeight(), face.getWidth(),
-          face.getIsLeftEyeOpenProbability(), face.getIsRightEyeOpenProbability(),
-          face.getIsSmilingProbability());
-
-
       byte faceX = (byte) (
           (face.getPosition().x + face.getWidth() / 2) / CAMERA_PREVIEW_WIDTH * 255);
 
       byte[] buf = new byte[]{FACE_LOCATION_CODE, faceX};
-      Log.i("JMRJMRJMR","Would be sending bytes: " + buf);
 
       // Send the data!
       mBLEDevice.sendData(buf);
@@ -535,9 +524,10 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
     // The distance here is incredibly inaccurate.
     // Using this as a signal for doing something is probably a bad user experience.
     // Only use it for debugging.
-    int distance = ((int)data[0]) << 8 | data[1];
+    int distance = (((int)data[0]) << 8) | data[1];
     ((TextView) findViewById(R.id.distanceDebug)).setText(
             "Distance: " + (float)(distance / 100.0f) + " m");
+    Log.d("JMRJMRJMR", "Distance: " + (float)(distance / 100.0f) + " m");
   }
 
   @Override

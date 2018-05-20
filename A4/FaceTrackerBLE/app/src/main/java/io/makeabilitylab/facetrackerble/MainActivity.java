@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
   private CameraSourcePreview mPreview;
   private GraphicOverlay mGraphicOverlay;
 
-  private boolean mIsFrontFacing = true;
-
   // Bluetooth stuff
   private BLEDevice mBLEDevice;
 
@@ -89,13 +87,6 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
 
     mPreview = (CameraSourcePreview) findViewById(R.id.cameraSourcePreview);
     mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-
-    final Button button = (Button) findViewById(R.id.buttonFlip);
-    button.setOnClickListener(mFlipButtonListener);
-
-    if (savedInstanceState != null) {
-      mIsFrontFacing = savedInstanceState.getBoolean("IsFrontFacing");
-    }
 
     // Check for the camera permission before accessing the camera.  If the
     // permission is not granted yet, request permission.
@@ -182,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
    */
   private void createCameraSource() {
 
-    int cameraFacing = mIsFrontFacing ? CameraSource.CAMERA_FACING_FRONT : CameraSource.CAMERA_FACING_BACK;
+    int cameraFacing = CameraSource.CAMERA_FACING_FRONT;
 
     Context context = getApplicationContext();
 
@@ -336,25 +327,9 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
   @Override
   public void onSaveInstanceState(Bundle savedInstanceState) {
     super.onSaveInstanceState(savedInstanceState);
-    savedInstanceState.putBoolean("IsFrontFacing", mIsFrontFacing);
   }
 
-  /**
-   * Toggles between front-facing and rear-facing modes.
-   */
-  private View.OnClickListener mFlipButtonListener = new View.OnClickListener() {
-    public void onClick(View v) {
-      mIsFrontFacing = !mIsFrontFacing;
 
-      if (mCameraSource != null) {
-        mCameraSource.release();
-        mCameraSource = null;
-      }
-
-      createCameraSource();
-      startCameraSource();
-    }
-  };
 
   //==============================================================================================
   // Camera Source Preview
@@ -424,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
     @Override
     public void onNewItem(int faceId, Face item) {
       mFaceGraphic.setId(faceId);
+      // Start recording a video of the person.
     }
 
     /**
@@ -455,7 +431,6 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
       boolean isPortrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
       String debugFaceInfo = String.format("Portrait: %b Front-Facing Camera: %b FaceId: %d Loc (x,y): (%.1f, %.1f) Size (w, h): (%.1f, %.1f) Left Eye: %.1f Right Eye: %.1f  Smile: %.1f",
           isPortrait,
-          mIsFrontFacing,
           face.getId(),
           face.getPosition().x, face.getPosition().y,
           face.getHeight(), face.getWidth(),
@@ -553,10 +528,16 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
 
   @Override
   public void onBleDataReceived(byte[] data) {
-    // CSE590 Student TODO
-    // Write code here that receives the ultrasonic measurements from Arduino
-    // and outputs them in your app. (You could also consider receiving the angle
-    // of the servo motor but this would be more for debugging and is not necessary)
+    // The general form of the received data is going to be:
+    //   - bytes 1 and 2 are an encoded 2-byte integer representing the number of centimeters
+    //         away an object is.
+
+    // The distance here is incredibly inaccurate.
+    // Using this as a signal for doing something is probably a bad user experience.
+    // Only use it for debugging.
+    int distance = ((int)data[0]) << 8 | data[1];
+    ((TextView) findViewById(R.id.distanceDebug)).setText(
+            "Distance: " + (float)(distance / 100.0f) + " m");
   }
 
   @Override

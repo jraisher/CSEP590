@@ -130,13 +130,12 @@ void setup() {
 }
 
 bool WARN = false;
+float DISTANCE = 0.0;
 void loop() 
 {
   unsigned long t1;
   unsigned long t2;
   unsigned long pulse_width;
-  float cm;
-  float inches;
 
   digitalWrite(TRIGGER_PIN, LOW);
   delay(2);
@@ -145,11 +144,9 @@ void loop()
   delayMicroseconds(10);
   digitalWrite(TRIGGER_PIN, LOW);
 
-  pulse_width = pulseIn(ECHO_PIN, HIGH);
-  cm = (pulse_width / 2) * 0.0344;
-  Serial.println(cm);
-
-  if (cm < ALERT_DISTANCE && cm > 1.0) {
+  DISTANCE = (pulseIn(ECHO_PIN, HIGH) / 2.0) * 0.0344;
+  
+  if (DISTANCE < ALERT_DISTANCE && DISTANCE > 1.0) {
     if (WARN) {
       signalAlert();      
     } else {
@@ -264,8 +261,16 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
  * the connected BLE device (e.g., Android)
  */
 static void bleSendDataTimerCallback(btstack_timer_source_t *ts) {
-  // CSE590 Student TODO
-  // Write code that uses the ultrasonic sensor and transmits this to Android
-  // Example ultrasonic code here: https://github.com/jonfroehlich/CSE590Sp2018/tree/master/L06-Arduino/RedBearDuoUltrasonicRangeFinder
-  // Also need to check if distance measurement < threshold and sound alarm
+  int distance = DISTANCE;
+  send_data[0] = 0xff & distance >> 8;
+  send_data[1] = 0xff & distance;
+  send_data[2] = 0x00;
+
+  Serial.println("Should be calling ble notify callback");
+  if (ble.attServerCanSendPacket()) {
+    Serial.println("should be sending data");
+    ble.sendNotify(send_handle, send_data, SEND_MAX_LEN);
+  }
+  ble.setTimer(ts, _sendDataFrequency);
+  ble.addTimer(ts);
 }

@@ -6,7 +6,7 @@
   */
 
 /* CHANGE THIS! */
-#define BLE_DEVICE_NAME            "BLE DEMO"
+#define BLE_DEVICE_NAME            "JMR_A4"
 
 /* 
  * BLE peripheral preferred connection parameters:

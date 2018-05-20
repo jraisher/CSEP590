@@ -524,10 +524,15 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
     // The distance here is incredibly inaccurate.
     // Using this as a signal for doing something is probably a bad user experience.
     // Only use it for debugging.
-    int distance = (((int)data[0]) << 8) | data[1];
+    StringBuilder sb = new StringBuilder();
+    for (byte b : data) {
+      sb.append(String.format("%02X ", b));
+    }
+    Log.i("JMRJMRJMR", "data_length: " + data.length + " data: " + sb.toString());
+    int distance = (int)((data[0] << 8) | (data[1] & 0xFF));
     ((TextView) findViewById(R.id.distanceDebug)).setText(
             "Distance: " + (float)(distance / 100.0f) + " m");
-    Log.d("JMRJMRJMR", "Distance: " + (float)(distance / 100.0f) + " m");
+    Log.i("JMRJMRJMR", "Distance: " + (float)(distance / 100.0f) + " m");
   }
 
   @Override

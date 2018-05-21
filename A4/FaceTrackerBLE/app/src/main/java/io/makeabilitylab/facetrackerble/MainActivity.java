@@ -9,7 +9,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +32,10 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.vision.face.LargestFaceFocusingProcessor;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import io.makeabilitylab.facetrackerble.ble.BLEDevice;
 import io.makeabilitylab.facetrackerble.ble.BLEListener;
@@ -399,7 +404,13 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
     @Override
     public void onNewItem(int faceId, Face item) {
       mFaceGraphic.setId(faceId);
-      // Start recording a video of the person.
+
+      // Take a picture
+      mCameraSource.takePicture(() -> {
+
+      }, (bytes) -> {
+        onPicture(bytes);
+      });
     }
 
     /**
@@ -532,5 +543,26 @@ public class MainActivity extends AppCompatActivity implements BLEListener {
   @Override
   public void onBleRssiChanged(int rssi) {
     // Not needed for this app
+  }
+
+  //==============================================================================================
+  // Camera Logic
+  //==============================================================================================
+  private void onPicture(byte[] bytes){
+    // Create an image file name
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = "JPEG_" + timeStamp + "_";
+    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    try {
+      FileOutputStream stream = new FileOutputStream(File.createTempFile(
+          imageFileName,
+          ".jpg",
+          storageDir));
+      stream.write(bytes);
+      stream.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+      Toast.makeText(this, "Failed to save image: " + imageFileName, Toast.LENGTH_LONG);
+    }
   }
 }

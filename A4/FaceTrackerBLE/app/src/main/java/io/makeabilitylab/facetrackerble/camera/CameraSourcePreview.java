@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
@@ -79,6 +80,10 @@ public class CameraSourcePreview extends ViewGroup {
             mCameraSource.release();
             mCameraSource = null;
         }
+    }
+
+    public Surface getSurface() {
+        return mSurfaceView.getHolder().getSurface();
     }
 
     private void startIfReady() throws IOException {

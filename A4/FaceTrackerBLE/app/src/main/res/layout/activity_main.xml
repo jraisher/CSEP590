@@ -9,6 +9,11 @@
     tools:context=".MainActivity"
     android:keepScreenOn="true">
 
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <io.makeabilitylab.facetrackerble.camera.CameraSourcePreview
         android:id="@+id/cameraSourcePreview"
         android:layout_width="match_parent"
@@ -23,12 +28,12 @@
             android:id="@+id/textViewBleStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
             android:layout_margin="4dp"
-            android:textSize="11dp"
+            android:text="flip"
             android:textColor="#FFFFFF"
-            android:text="flip"/>
+            android:textSize="11dp" />
 
     </io.makeabilitylab.facetrackerble.camera.CameraSourcePreview>
 

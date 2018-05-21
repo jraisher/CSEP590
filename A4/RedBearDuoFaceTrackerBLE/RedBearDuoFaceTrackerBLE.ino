@@ -129,6 +129,10 @@ void setup() {
   Serial.println("Finishing Setup");
 }
 
+const int DISTANCE_BUFFER_SIZE = 4;
+float DISTANCE_BUFFER [DISTANCE_BUFFER_SIZE] = {};
+int DISTANCE_BUFFER_INDEX = 0;
+
 bool WARN = false;
 float DISTANCE = 0.0;
 void loop() 
@@ -144,7 +148,20 @@ void loop()
   delayMicroseconds(10);
   digitalWrite(TRIGGER_PIN, LOW);
 
-  DISTANCE = (pulseIn(ECHO_PIN, HIGH) / 2.0) * 0.0344;
+  DISTANCE_BUFFER[DISTANCE_BUFFER_INDEX] = (pulseIn(ECHO_PIN, HIGH) / 2.0) * 0.0344;
+  DISTANCE_BUFFER_INDEX = (DISTANCE_BUFFER_INDEX + 1) % DISTANCE_BUFFER_SIZE;
+
+  float tmp = 0.0;
+  int count = 0;
+  for (int i = 0; i < DISTANCE_BUFFER_SIZE; ++i) {
+    if (DISTANCE_BUFFER[i] > 0) {
+      tmp += DISTANCE_BUFFER[i];
+      count += 1;
+    }
+  }
+  if (count > 0) {
+    DISTANCE = tmp / count;
+  }
   
   if (DISTANCE < ALERT_DISTANCE && DISTANCE > 1.0) {
     if (WARN) {
@@ -165,7 +182,6 @@ void loop()
  */
 int LIGHT_STATE = HIGH;
 void signalAlert() {
-  Serial.println("alert");
   if (LIGHT_STATE == HIGH) {
     LIGHT_STATE = LOW;
   } else {
@@ -262,13 +278,12 @@ int bleReceiveDataCallback(uint16_t value_handle, uint8_t *buffer, uint16_t size
  */
 static void bleSendDataTimerCallback(btstack_timer_source_t *ts) {
   int distance = DISTANCE;
+  Serial.println(distance);
   send_data[0] = 0xff & distance >> 8;
   send_data[1] = 0xff & distance;
   send_data[2] = 0x00;
 
-  Serial.println("Should be calling ble notify callback");
   if (ble.attServerCanSendPacket()) {
-    Serial.println("should be sending data");
     ble.sendNotify(send_handle, send_data, SEND_MAX_LEN);
   }
   ble.setTimer(ts, _sendDataFrequency);
